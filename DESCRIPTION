@@ -1,5 +1,5 @@
 Package: piggyback
-Version: 0.0.7
+Version: 0.0.8
 Title: Managing Larger Data on a GitHub Repository
 Description: Because larger (> 50 MB) data files cannot easily be committed to git,
   a different approach is required to manage data associated with an analysis in a 
@@ -31,10 +31,10 @@ VignetteBuilder: knitr
 RoxygenNote: 6.1.0
 Language: en-US
 NeedsCompilation: no
-Packaged: 2018-09-22 05:59:49 UTC; cboettig
+Packaged: 2018-10-06 18:36:48 UTC; cboettig
 Author: Carl Boettiger [aut, cre, cph]
     (<https://orcid.org/0000-0002-1642-628X>),
   Mark Padgham [ctb] (<https://orcid.org/0000-0003-2172-5265>)
 Maintainer: Carl Boettiger <cboettig@gmail.com>
 Repository: CRAN
-Date/Publication: 2018-09-30 15:10:06 UTC
+Date/Publication: 2018-10-06 21:00:11 UTC

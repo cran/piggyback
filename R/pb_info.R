@@ -25,8 +25,9 @@ release_data <- function(x, r) {
     return(
     data.frame(
       file_name = "",
-      tag = x$tag_name,
+      size = 0L,
       timestamp = lubridate::as_datetime(0),
+      tag = x$tag_name,
       owner = r[[1]],
       repo = r[[2]],
       upload_url = x$upload_url,
@@ -41,10 +42,12 @@ release_data <- function(x, r) {
     file_name = local_filename(
       vapply(x$assets, `[[`, character(1), "name")
     ),
-    tag = x$tag_name,
+    size =
+      vapply(x$assets, `[[`, integer(1), "size"),
     timestamp = lubridate::as_datetime(
       vapply(x$assets, `[[`, character(1), "updated_at")
     ),
+    tag = x$tag_name,
     owner = r[[1]],
     repo = r[[2]],
     upload_url = x$upload_url,
@@ -77,10 +80,10 @@ pb_info_fn <- function(repo = guess_repo(),
           ". You can create a new release with pb_new_release() function."
         ))
       } else {
-        create <- utils::askYesNo(paste(
+        create <- askYesNo(paste(
           "release tag", tag,
           "does not exist. Would you like to create it?"
-        ), )
+        ))
         if (create) {
           pb_new_release(repo, tag, .token = .token)
         } else {
