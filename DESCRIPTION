@@ -1,5 +1,5 @@
 Package: piggyback
-Version: 0.0.8
+Version: 0.0.9
 Title: Managing Larger Data on a GitHub Repository
 Description: Because larger (> 50 MB) data files cannot easily be committed to git,
   a different approach is required to manage data associated with an analysis in a 
@@ -17,7 +17,10 @@ Authors@R: c(person("Carl", "Boettiger",
                     comment = c(ORCID = "0000-0002-1642-628X")),
              person("Mark", "Padgham", 
                      role = c("ctb"),
-                     comment = c(ORCID = "0000-0003-2172-5265")))
+                     comment = c(ORCID = "0000-0003-2172-5265")),
+             person(c('Jeffrey', 'O'), 'Hanson',
+                    role = c("ctb"),
+                    comment = c(ORCID = "0000-0002-4716-6134")))
 URL: https://github.com/ropensci/piggyback
 BugReports: https://github.com/ropensci/piggyback/issues
 License: GPL-3
@@ -28,13 +31,14 @@ Imports: gh, httr, jsonlite, git2r, fs, usethis, crayon, clisymbols,
         magrittr, lubridate, memoise
 Suggests: spelling, readr, covr, testthat, datasets, knitr, rmarkdown
 VignetteBuilder: knitr
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.1
 Language: en-US
 NeedsCompilation: no
-Packaged: 2018-10-06 18:36:48 UTC; cboettig
+Packaged: 2019-01-08 22:10:42 UTC; cboettig
 Author: Carl Boettiger [aut, cre, cph]
     (<https://orcid.org/0000-0002-1642-628X>),
-  Mark Padgham [ctb] (<https://orcid.org/0000-0003-2172-5265>)
+  Mark Padgham [ctb] (<https://orcid.org/0000-0003-2172-5265>),
+  Jeffrey O Hanson [ctb] (<https://orcid.org/0000-0002-4716-6134>)
 Maintainer: Carl Boettiger <cboettig@gmail.com>
 Repository: CRAN
-Date/Publication: 2018-10-06 21:00:11 UTC
+Date/Publication: 2019-01-08 23:30:03 UTC
