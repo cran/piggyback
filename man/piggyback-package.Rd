@@ -22,14 +22,11 @@ It has two main modes or workflows:
 \itemize{
 \item \code{\link[=pb_upload]{pb_upload()}} / \code{\link[=pb_download]{pb_download()}}:  Upload and download individual files to/from
 the desired release of the specified repository
-\item \code{\link[=pb_track]{pb_track()}}: Use a \code{git-lfs} style tracking of specific
-file types
 }
 }
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://docs.ropensci.org/piggyback}
   \item \url{https://github.com/ropensci/piggyback}
   \item Report bugs at \url{https://github.com/ropensci/piggyback/issues}
 }

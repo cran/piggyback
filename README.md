@@ -3,7 +3,7 @@
 
 # piggyback <img src="man/figures/logo.svg" align="right" alt="" width="120" />
 
-[![lifecycle](https://img.shields.io/badge/lifecycle-stable-green.svg)](https://www.tidyverse.org/lifecycle/#stable)
+[![lifecycle](https://img.shields.io/badge/lifecycle-stable-green.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 [![Travis-CI Build
 Status](https://travis-ci.org/ropensci/piggyback.svg?branch=master)](https://travis-ci.org/ropensci/piggyback)
 [![Coverage
@@ -13,7 +13,7 @@ status](https://ci.appveyor.com/api/projects/status/github/cboettig/piggyback?br
 [![CRAN
 status](https://www.r-pkg.org/badges/version/piggyback)](https://cran.r-project.org/package=piggyback)
 [![Peer Review
-Status](https://badges.ropensci.org/220_status.svg)](https://github.com/ropensci/onboarding/issues/220)
+Status](https://badges.ropensci.org/220_status.svg)](https://github.com/ropensci/software-review/issues/220)
 [![DOI](https://zenodo.org/badge/132979724.svg)](https://zenodo.org/badge/latestdoi/132979724)
 [![DOI](http://joss.theoj.org/papers/10.21105/joss.00971/status.svg)](https://doi.org/10.21105/joss.00971)
 
@@ -21,7 +21,7 @@ Because larger (\> 50 MB) data files cannot easily be committed to git,
 a different approach is required to manage data associated with an
 analysis in a GitHub repository. This package provides a simple
 work-around by allowing larger ([up to 2 GB per
-file](https://help.github.com/articles/distributing-large-binaries/))
+file](https://docs.github.com/en/github/managing-large-files/distributing-large-binaries))
 data files to piggyback on a repository as assets attached to individual
 GitHub releases. These files are not handled by git in any way, but
 instead are uploaded, downloaded, or edited directly by calls through
@@ -106,7 +106,7 @@ pb_download()
 `piggyback` acts like a poor soul’s [Git
 LFS](https://git-lfs.github.com/). Git LFS is not only expensive, it
 also [breaks GitHub’s collaborative
-model](https://medium.com/@megastep/github-s-large-file-storage-is-no-panacea-for-open-source-quite-the-opposite-12c0e16a9a91)
+model](https://angryfrenchman.org/github-s-large-file-storage-is-no-panacea-for-open-source-quite-the-opposite-12c0e16a9a91)
 – basically if someone wants to submit a PR with a simple edit to your
 docs, they cannot fork your repository since that would otherwise count
 against your Git LFS storage. Unlike Git LFS, `piggyback` doesn’t take
@@ -119,7 +119,7 @@ uploaded data.
 ## But what will GitHub think of this?
 
 [GitHub
-documentation](https://help.github.com/articles/distributing-large-binaries/)
+documentation](https://docs.github.com/en/github/managing-large-files/distributing-large-binaries)
 at the time of writing endorses the use of attachments to releases as a
 solution for distributing large files as part of your project:
 
@@ -139,7 +139,6 @@ alternatives](https://docs.ropensci.org/piggyback/articles/alternatives.html).
 
 Please note that this project is released with a [Contributor Code of
 Conduct](https://ropensci.org/code-of-conduct/). By participating in
-this project you agree to abide by its
-terms.
+this project you agree to abide by its terms.
 
 [![ropensci\_footer](https://ropensci.org/public_images/ropensci_footer.png)](https://ropensci.org)

@@ -1,11 +1,8 @@
 
-## Map local paths to valid names for GitHub assets
 asset_filename <- function(x, start = ".") {
-  x <- fs::path_rel(x, start)
-  x <- gsub("^\\.", "", x)
-  # name relative to repo
-  ## Cannot use %2f as html escape for slash
-  gsub(.Platform$file.sep, ".2f", x)
+  ## piggyback will no longer embed file structure in filename
+  ## Asset uploading is simply flat storage
+  x
 }
 
 local_filename <- function(x) {
@@ -69,30 +66,34 @@ maybe <- function(expr, otherwise, quiet = TRUE) {
 }
 
 
-#' @importFrom git2r remote_url repository discover_repository
 guess_repo <- function(path = ".") {
-  repo <- git2r::repository(
-    git2r::discover_repository(path)
-  )
 
-  remotes <- git2r::remotes(repo)
+  exists <- requireNamespace("gert", quietly = TRUE)
+  if(!exists) stop(paste(
+    "Install package 'gert' to let piggyback discover the",
+    "current repo, or provide your repo name explicitly"))
+
+  repo <- gert::git_find(path)
+  remotes <- gert::git_remote_list(repo)
+  remotes_names <- remotes[["name"]]
 
   # When there are more than 1 remote, we prefer "upstream"
   #   then "origin." If neither exists, we error to avoid
   #   ambiguity.
-  remote <- if (length(remotes) > 1) {
-    if ("upstream" %in% remotes) {
+  remote <- if (length(remotes_names) > 1) {
+    if ("upstream" %in% remotes_names) {
       "upstream"
-    } else if ("origin" %in% remotes) {
+    } else if ("origin" %in% remotes_names) {
       "origin"
     } else
       stop("Cannot infer repo, please provide `repo` explicitly.",
            call. = FALSE)
   } else {
-    remotes
+    remotes_names
   }
 
-  addr <- git2r::remote_url(repo = repo, remote = remote)
+  addr <- remotes[remotes[["name"]] == remote, "url"][["url"]]
+
   out <- gsub(".*[:|/]([^/]+/[^/]+)(?:\\.git$)?", "\\1", addr)
   gsub("\\.git$", "", out)
 }

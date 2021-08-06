@@ -1,4 +1,16 @@
-# piggyback 0.0.11
+# piggyback 0.1.0
+
+* address remaining authentication issue in changes to GitHub API (on pb_upload()) [#47]
+* Use flat file structure on upload/download instead of encoding path [#48]
+* improve performance via more aggressive memoising of `pb_info()` calls, inceasing default `piggyback_cache_duration` to 10 minutes [#46]
+* Resolve bug introduced by API changes that would stop creation of tags on repos with default branch called `main` or without previous releases [#48]
+
+
+# piggyback 0.0.12
+
+* address issues in authentication due to changes in GitHub API (#37)
+
+# piggyback 0.0.11 2020-02-25
 
 * `guess_repo()` now infers a remote when there are multiple associated with the repo. The "upstream" (preferred) or "origin" repo is selected if either exists, otherwise the function errors and asks the user to explicitly specify a repo (#31).
 * `release_info()` now works properly when there are no existing releases, which enables the usage of `pb_new_release()` on repos without a release (#29).

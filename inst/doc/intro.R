@@ -9,14 +9,3 @@ knitr::opts_chunk$set(
 Sys.setenv(piggyback_cache_duration=0)
 
 
-## -----------------------------------------------------------------------------
-library(piggyback)
-
-## -----------------------------------------------------------------------------
-pb_list(repo = "cboettig/piggyback-tests", 
-        tag = "v0.0.1")
-
-## ----include=FALSE------------------------------------------------------------
-unlink("*.gz")
-unlink("data/", TRUE)
-

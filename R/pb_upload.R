@@ -38,6 +38,10 @@ pb_upload <- function(file,
                       show_progress = TRUE,
                       .token = get_token(),
                       dir = ".") {
+
+  ## start fresh
+  memoise::forget(memoised_pb_info)
+
   out <- lapply(file, function(f)
     pb_upload_file(
       f,
@@ -50,6 +54,9 @@ pb_upload <- function(file,
       .token,
       dir
     ))
+
+  ## break cache when done
+  memoise::forget(memoised_pb_info)
   invisible(out)
 }
 
@@ -97,6 +104,8 @@ pb_upload_file <- function(file,
     name <- fs::path_rel(file, start = dir)
   }
 
+
+  ## memoised for piggyback_cache_duration
   df <- pb_info(repo, tag, .token)
 
 
@@ -137,18 +146,19 @@ pb_upload_file <- function(file,
 
   if (!is.null(progress)) {
     message(paste("uploading", name, "..."))
-}
+  }
+
   r <- httr::POST(sub("\\{.+$", "", df$upload_url[[1]]),
                   query = list(name = asset_filename(name)),
+                  httr::add_headers(Authorization = paste("token", .token)),
                   body = httr::upload_file(file),
-                  progress,
-                  httr::authenticate(.token, "x-oauth-basic", "basic")
+                  progress
   )
 
   cat("\n")
   httr::stop_for_status(r)
 
   ## Release info changed, so break cache
-  memoise::forget(memoised_pb_info)
+  # memoise::forget(memoised_pb_info)
   invisible(r)
 }
