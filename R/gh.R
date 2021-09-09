@@ -18,7 +18,7 @@ api_error_msg <- function(r) {
     "Cannot access release data for repository ",
     crayon::blue$bold(paste0(r[[1]], "/", r[[2]])),
     ".",
-    " Check that you have set a GITHUB_TOKEN and",
+    " Check that you have provided a .token and",
     " that at least one release on your GitHub repository page."
   )
 }
@@ -28,23 +28,7 @@ api_error_msg <- function(r) {
 
 
 get_token <- function(warn = TRUE) {
-
-  ## Not safe: doing Sys.setenv(GITHUB_PAT="") prevents default.
-  ## Sys.unsetenv("GITHUB_PAT")
-  #pat <- Sys.getenv("GITHUB_PAT", Sys.getenv("GITHUB_TOKEN"))
-
-
-  pat <- Sys.getenv("GITHUB_PAT")
-  if (pat == "") pat <- Sys.getenv("GITHUB_TOKEN")
-  if (pat == "") {
-    pat <- paste0(
-      "b2b7441d", "aeeb010b", "1df26f1f6",
-      "0a7f1ed", "c485e443"
-    )
-    if (warn) warning("Using default public GITHUB_TOKEN.
-                     Please set your own token")
-  }
-  pat
+  gh::gh_token()
 }
 #####################################################
 

@@ -1,5 +1,5 @@
 Package: piggyback
-Version: 0.1.0
+Version: 0.1.1
 Title: Managing Larger Data on a GitHub Repository
 Description: Because larger (> 50 MB) data files cannot easily be committed to git,
   a different approach is required to manage data associated with an analysis in a 
@@ -29,15 +29,14 @@ BugReports: https://github.com/ropensci/piggyback/issues
 License: GPL-3
 Encoding: UTF-8
 ByteCompile: true
-Imports: gh, httr, jsonlite, fs, crayon, clisymbols, magrittr,
-        lubridate, memoise
+Imports: gh, httr, jsonlite, fs, crayon, clisymbols, lubridate, memoise
 Suggests: spelling, readr, covr, testthat, gert, datasets, knitr,
-        rmarkdown, usethis
+        rmarkdown, usethis, magrittr
 VignetteBuilder: knitr
 RoxygenNote: 7.1.1
 Language: en-US
 NeedsCompilation: no
-Packaged: 2021-08-05 22:35:20 UTC; cboettig
+Packaged: 2021-09-08 23:36:03 UTC; cboettig
 Author: Carl Boettiger [aut, cre, cph]
     (<https://orcid.org/0000-0002-1642-628X>),
   Mark Padgham [ctb] (<https://orcid.org/0000-0003-2172-5265>),
@@ -45,4 +44,4 @@ Author: Carl Boettiger [aut, cre, cph]
   Kevin Kuo [ctb] (<https://orcid.org/0000-0001-7803-7901>)
 Maintainer: Carl Boettiger <cboettig@gmail.com>
 Repository: CRAN
-Date/Publication: 2021-08-06 04:10:02 UTC
+Date/Publication: 2021-09-09 04:40:02 UTC
