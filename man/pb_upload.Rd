@@ -11,9 +11,9 @@ pb_upload(
   name = NULL,
   overwrite = "use_timestamps",
   use_timestamps = NULL,
-  show_progress = TRUE,
-  .token = get_token(),
-  dir = "."
+  show_progress = getOption("piggyback.verbose", default = TRUE),
+  .token = gh::gh_token(),
+  dir = NULL
 )
 }
 \arguments{
@@ -34,11 +34,11 @@ only overwriting those files which are older.}
 \item{use_timestamps}{DEPRECATED.}
 
 \item{show_progress}{logical, show a progress bar be shown for uploading?
-Defaults to \code{TRUE}.}
+Defaults to \code{TRUE} - can also set globally with options("piggyback.verbose")}
 
 \item{.token}{GitHub authentication token, see \verb{[gh::gh_token()]}}
 
-\item{dir}{directory relative to which file names should be based.}
+\item{dir}{directory relative to which file names should be based, defaults to NULL for current working directory.}
 }
 \description{
 NOTE: you must first create a release if one does not already exists.

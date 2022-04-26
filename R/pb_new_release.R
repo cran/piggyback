@@ -5,7 +5,7 @@
 #' @param tag tag to create for this release
 #' @param commit Specifies the commit-ish value that
 #'  determines where the Git tag is created from.
-#'  Can be any branch or commit SHA. Unused if the
+#'  Can be any branch or full commit SHA (not the short hash). Unused if the
 #'  git tag already exists. Default: the repository's
 #'  default branch (usually `master`).
 #' @param name The name of the release. Defaults to tag.
@@ -17,8 +17,6 @@
 #' identify the release as a pre-release.
 #' @inheritParams pb_upload
 #' @export
-#' @importFrom jsonlite toJSON
-#' @importFrom httr content GET POST stop_for_status
 #' @examples \dontrun{
 #' pb_new_release("cboettig/piggyback-tests", "v0.0.5")
 #' }
@@ -29,23 +27,16 @@ pb_new_release <- function(repo = guess_repo(),
                            body = "Data release",
                            draft = FALSE,
                            prerelease = FALSE,
-                           .token = get_token()) {
+                           .token = gh::gh_token()) {
 
-  releases <- release_info(repo, .token)
+  releases <- pb_releases(repo = repo, .token = .token, verbose = FALSE)
 
-  # if no releases exist, release_info returns a gh_response length-0 list
-  if(length(releases) > 0){
-    # Otherwise, list is at least length 1, with names.
-    if("tag_name" %in% names(releases[[1]])){
-      current_tags <- lapply(releases, `[[`, "tag_name")
-      if (tag %in% current_tags) {
-        stop(paste("release tag", tag, "already exists"))
-      }
-    }
+  # if no releases exist, pb_releases returns a dataframe of releases
+  if(nrow(releases) > 0 && tag %in% releases$tag_name){
+    cli::cli_abort("Release tag {.val {tag}} already exists!")
   }
 
-
-  r <- strsplit(repo, "/")[[1]]
+  r <- parse_repo(repo)
 
   payload <- compact(list(
     tag_name = tag,
@@ -56,28 +47,31 @@ pb_new_release <- function(repo = guess_repo(),
     prerelease = prerelease
   ))
 
-  ## gh fails to pass body correctly??
-  #gh("/repos/:owner/:repo/releases", owner = r[[1]], repo = r[[2]],
-  #   .method = "POST", body = toJSON(payload,auto_unbox = TRUE), encode="json")
+  ## gh fails to pass body correctly?
+  # gh("/repos/:owner/:repo/releases", owner = r[[1]], repo = r[[2]],
+  #  .method = "POST", body = toJSON(payload,auto_unbox = TRUE), encode="json")
 
-  resp <- httr::POST(paste0(
-      "https://api.github.com/repos/", r[[1]], "/",
-      r[[2]], "/", "releases"),
+  resp <- httr::POST(
+    glue::glue("https://api.github.com/repos/{r[[1]]}/{r[[2]]}/releases"),
     httr::add_headers(Authorization = paste("token",.token)),
     body = jsonlite::toJSON(payload, auto_unbox = TRUE)
   )
 
-  if(getOption("verbose")) httr::warn_for_status(resp)
+  if(httr::http_error(resp)) {
+    cli::cli_warn(
+      c("!"="Failed to create release: HTTP error {.val {httr::status_code(resp)}}.",
+        "See returned error messages for more details"))
 
-  ## Release info changed, so break cache
-  memoise::forget(memoised_pb_info)
+    return(httr::content(resp))
+  }
 
-  ## refresh
-  pb_info(repo = repo, tag = tag, .token = .token)
+  ## Release info changed, so break caches
+  try({
+    memoise::forget(pb_info)
+    memoise::forget(pb_releases)
+  })
 
   release <- httr::content(resp)
+  cli::cli_alert_success("Created new release {.val {name}}.")
   invisible(release)
 }
-
-compact <- function (l)
-  Filter(Negate(is.null), l)

@@ -12,8 +12,8 @@ pb_download(
   overwrite = TRUE,
   ignore = "manifest.json",
   use_timestamps = TRUE,
-  show_progress = TRUE,
-  .token = get_token()
+  show_progress = getOption("piggyback.verbose", default = TRUE),
+  .token = gh::gh_token()
 )
 }
 \arguments{
@@ -38,7 +38,7 @@ default \code{TRUE}.}
 \item{use_timestamps}{DEPRECATED.}
 
 \item{show_progress}{logical, show a progress bar be shown for uploading?
-Defaults to \code{TRUE}.}
+Defaults to \code{TRUE} - can also set globally with options("piggyback.verbose")}
 
 \item{.token}{GitHub authentication token, see \verb{[gh::gh_token()]}}
 }

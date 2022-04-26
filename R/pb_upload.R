@@ -12,9 +12,9 @@
 #'  only overwriting those files which are older.
 #' @param use_timestamps DEPRECATED.
 #' @param show_progress logical, show a progress bar be shown for uploading?
-#' Defaults to `TRUE`.
+#' Defaults to `TRUE` - can also set globally with options("piggyback.verbose")
 #' @param .token GitHub authentication token, see `[gh::gh_token()]`
-#' @param dir directory relative to which file names should be based.
+#' @param dir directory relative to which file names should be based, defaults to NULL for current working directory.
 #' @examples
 #' \dontrun{
 #' # Needs your real token to run
@@ -22,7 +22,6 @@
 #' readr::write_tsv(mtcars,"mtcars.tsv.xz")
 #' pb_upload("mtcars.tsv.xz", "cboettig/piggyback-tests")
 #' }
-#' @importFrom httr progress upload_file POST stop_for_status
 #' @export
 #'
 pb_upload <- function(file,
@@ -31,12 +30,37 @@ pb_upload <- function(file,
                       name = NULL,
                       overwrite = "use_timestamps",
                       use_timestamps = NULL,
-                      show_progress = TRUE,
-                      .token = get_token(),
-                      dir = ".") {
+                      show_progress = getOption("piggyback.verbose", default = TRUE),
+                      .token = gh::gh_token(),
+                      dir = NULL) {
+
+  stopifnot(
+    is.character(repo),
+    is.character(tag),
+    length(tag) == 1,
+    length(repo) == 1
+  )
+
+  releases <- pb_releases(repo, .token)
+
+  if(tag != "latest" && !tag %in% releases$tag_name && !interactive()) {
+    cli::cli_abort("Release {.val {tag}} not found in {.val {repo}}. No upload performed.")
+  }
+
+  if(tag != "latest" && !tag %in% releases$tag_name) {
+    cli::cli_alert_warning("Release {.val {tag}} not found in {.val {repo}}.")
+
+    run <- utils::menu(
+      choices = c("Yes", "No"),
+      title = glue::glue("Would you like to create a new release now?")
+    )
+
+    if(run == "No") return(invisible(NULL))
+    if(run == "Yes") pb_new_release(repo = repo, tag = tag, .token = .token)
+  }
 
   ## start fresh
-  memoise::forget(memoised_pb_info)
+  memoise::forget(pb_info)
 
   out <- lapply(file, function(f)
     pb_upload_file(
@@ -52,7 +76,7 @@ pb_upload <- function(file,
     ))
 
   ## break cache when done
-  memoise::forget(memoised_pb_info)
+  memoise::forget(pb_info)
   invisible(out)
 }
 
@@ -62,19 +86,26 @@ pb_upload_file <- function(file,
                            name = NULL,
                            overwrite = "use_timestamps",
                            use_timestamps = NULL,
-                           show_progress = TRUE,
-                           .token = get_token(),
-                           dir = ".") {
-  if (!file.exists(file)) {
-    warning("file ", file, " does not exist")
+                           show_progress = getOption("piggyback.verbose", default = TRUE),
+                           .token = gh::gh_token(),
+                           dir = NULL) {
+
+  file_path <- do.call(file.path, compact(list(dir,file)))
+  ## Uses NULL as default dir, drops it with compact, then
+  ## does the file.path call with what's left
+  ##
+  ## This is better than using "." as default dir because if you try to pass an
+  ## absolute path with "." e.g. file.path(".","C:/Users/Tan") it will
+  ## return "./C:/Users/Tan" which is not desired.
+
+  if (!file.exists(file_path)) {
+    cli::cli_warn("file {.file {file_path}} does not exist.")
     return(NULL)
   }
-  if(!is.null(use_timestamps)){
-    warning(paste("use_timestamps argument is deprecated",
-                  "please set overwrite='use_timestamps'",
-                  "instead."))
-  }
 
+  if(!is.null(use_timestamps)){
+    cli::cli_warn("{.code use_timestamps} argument is deprecated, please set {.code overwrite = 'use_timestamps'} instead")
+  }
 
   ## Yeah, having two separate arguments was clearly a mistake!
   ## Code has been partially refactored now so that user just
@@ -91,34 +122,27 @@ pb_upload_file <- function(file,
   )
 
   progress <- httr::progress("up")
-  if (!show_progress) {
-    progress <- NULL
-  }
+  if (!show_progress) progress <- NULL
 
   if (is.null(name)) {
     ## name is name on GitHub, technically need not be name of local file
-    name <- basename(file) # fs::path_rel(file, start = dir)
+    name <- basename(file_path)
   }
-
 
   ## memoised for piggyback_cache_duration
   df <- pb_info(repo, tag, .token)
-
 
   i <- which(df$file_name == name)
 
   if (length(i) > 0) { # File of same name is on GitHub
 
     if (use_timestamps) {
-      local_timestamp <- fs::file_info(file)$modification_time
+      local_timestamp <- fs::file_info(file_path)$modification_time
 
       no_update <- local_timestamp <= df[i, "timestamp"]
       if (no_update) {
-        message(paste(
-          "matching or more recent version of",
-          file, "found on GitHub, not uploading"
-        ))
-        return(NULL)
+        cli::cli_warn("Matching or more recent version of {.file {file_path}} found on GH, not uploading.")
+        return(invisible(NULL))
       }
     }
 
@@ -131,30 +155,24 @@ pb_upload_file <- function(file,
              .token = .token
       )
     } else {
-      warning(paste(
-        "Skipping upload of", df$file_name[i],
-        "as file exists on GitHub",
-        repo, "and overwrite = FALSE"
-      ))
-      return(NULL)
+      cli::cli_warn("Skipping upload of {.file {df$file_name[i]}} as file exists on GitHub and {.code overwrite = FALSE}")
+      return(invisible(NULL))
     }
   }
 
-  if (!is.null(progress)) {
-    message(paste("uploading", name, "..."))
-  }
+  if (show_progress) cli::cli_alert_info("Uploading {.file {name}} ...")
 
   r <- httr::POST(sub("\\{.+$", "", df$upload_url[[1]]),
-                  query = list(name = asset_filename(name)),
+                  query = list(name = name),
                   httr::add_headers(Authorization = paste("token", .token)),
-                  body = httr::upload_file(file),
-                  progress
-  )
+                  body = httr::upload_file(file_path),
+                  progress)
 
   cat("\n")
-  if(getOption("verbose")) httr::warn_for_status(r)
+
+  if(show_progress) httr::warn_for_status(r)
 
   ## Release info changed, so break cache
-  # memoise::forget(memoised_pb_info)
+  try({memoise::forget(pb_info)})
   invisible(r)
 }

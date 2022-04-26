@@ -1,3 +1,18 @@
+# piggyback 0.1.2
+
+* update intro vignette to remove all mentions of `pb_track()`, `pb_push()`, and `pb_pull()` which were removed as of version 0.0.0.9900
+* `pb_upload()` now handles the `dir` argument to control relative path directories.
+* update intro vignette to remove mention of path name handling and instead provide examples of how path names are handled.
+* update intro vignette instructions for git authentication
+* `pb_new_release()` now reports HTTP errors when attempting to create a new release and returns the contents of the error if it fails. 
+* `pb_releases()` created - it returns a list of releases available in the repository.
+* Internal function `pb_info()` refactored to search for the specified tag(s) which should improve performance. Should handle multiple tags gracefully.
+* Internal function `pb_info()` (and therefore `pb_list()`, `pb_download()`, `pb_download_url()`) no longer ask about creating new releases if the release is not found. 
+* `pb_upload()` is now the only function that offers (interactively) to create a new release if release is not found. If noninteractive, user must run `pb_new_release()` manually prior to uploading. 
+* CLI messaging now consistently uses `{cli}` package and no longer uses clisymbols or crayon - this is to align with the imports from the `{gh}` package.
+* Documentation updated.
+* Add options("piggyback.verbose") TRUE/FALSE to control verbosity/messaging levels.
+
 # piggyback 0.1.1
 
 * switch to gh::gh_token() for token management.  Still supports the same env var approach, but also compatible with `gitcreds` and other use.
