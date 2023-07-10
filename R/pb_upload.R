@@ -40,13 +40,20 @@ pb_upload <- function(file,
     length(repo) == 1
   )
 
-  releases <- pb_releases(repo, .token)
+  releases <- pb_releases(repo = repo,.token = .token)
 
-  if(tag != "latest" && !tag %in% releases$tag_name && !interactive()) {
+  if(tag == "latest" && length(releases$tag_name) > 0 && !"latest" %in% releases$tag_name) {
+    if(getOption("piggyback.verbose", default = interactive())){
+      cli::cli_alert_info("Uploading to latest release: {.val {releases$tag_name[[1]]}}.")
+    }
+    tag <- releases$tag_name[[1]]
+  }
+
+  if(!tag %in% releases$tag_name && !interactive()) {
     cli::cli_abort("Release {.val {tag}} not found in {.val {repo}}. No upload performed.")
   }
 
-  if(tag != "latest" && !tag %in% releases$tag_name) {
+  if(!tag %in% releases$tag_name) {
     cli::cli_alert_warning("Release {.val {tag}} not found in {.val {repo}}.")
 
     run <- utils::menu(
@@ -55,11 +62,12 @@ pb_upload <- function(file,
     )
 
     if(run == 2) return(invisible(NULL))
-    if(run == 1) pb_new_release(repo = repo, tag = tag, .token = .token)
+    if(run == 1) pb_release_create(repo = repo, tag = tag, .token = .token)
+    Sys.sleep(2)
   }
 
   ## start fresh
-  memoise::forget(pb_info)
+  .pb_cache_clear()
 
   out <- lapply(file, function(f)
     pb_upload_file(
@@ -75,7 +83,7 @@ pb_upload <- function(file,
     ))
 
   ## break cache when done
-  memoise::forget(pb_info)
+  .pb_cache_clear()
   invisible(out)
 }
 
@@ -130,7 +138,7 @@ pb_upload_file <- function(file,
   }
 
   ## memoised for piggyback_cache_duration
-  df <- pb_info(repo, tag, .token)
+  df <- pb_info(repo = repo, tag = tag, .token = .token)
 
   i <- which(df$file_name == name)
 
@@ -162,7 +170,7 @@ pb_upload_file <- function(file,
 
   if (show_progress) cli::cli_alert_info("Uploading {.file {name}} ...")
 
-  releases <- pb_releases(repo = repo)
+  releases <- pb_releases(repo = repo, .token = .token)
   upload_url <- releases$upload_url[releases$tag_name == tag]
 
   r <- httr::RETRY(
@@ -175,11 +183,9 @@ pb_upload_file <- function(file,
     terminate_on = c(400, 401, 403, 404, 422)
   )
 
-  cat("\n")
-
   if(show_progress) httr::warn_for_status(r)
 
-  ## Release info changed, so break cache
-  try({memoise::forget(pb_info)})
+  # Release info changed, so break cache
+  .pb_cache_clear()
   invisible(r)
 }

@@ -81,7 +81,8 @@ get_release_assets <- function(releases, r, .token) {
                 repo = r[[2]],
                 release_id = releases$release_id[[i]],
                 .limit = Inf,
-                .token = .token)
+                .token = .token,
+                .progress = getOption("piggyback.verbose", default = interactive()))
     if(length(a) == 0) next
     if (!identical(a[[1]], "")) {
       # convert list to dataframe and store in asset list
@@ -126,10 +127,10 @@ pb_info <- function(repo = guess_repo(),
         file_name = "",
         size = 0L,
         timestamp = lubridate::as_datetime(0),
-        tag = x$tag_name,
+        tag = "",
         owner = r[[1]],
         repo = r[[2]],
-        upload_url = x$upload_url,
+        upload_url = "",
         browser_download_url = "",
         id = "",
         state = "",
@@ -138,7 +139,7 @@ pb_info <- function(repo = guess_repo(),
   }
 
   # if tag is latest, set tag to first tag present in releases
-  if(!is.null(tag) && length(tag) == 1 && tag == "latest") tag <- releases$tag_name[[1]]
+  if(length(tag)==1 && tag == "latest" && !"latest" %in% releases$tag_name) tag <- releases$tag_name[[1]]
 
   # if tag is present, filter the releases to search to just the tags requested
   if(!is.null(tag)) releases <- releases[releases$tag_name %in% tag,]

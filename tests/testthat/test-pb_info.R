@@ -23,11 +23,27 @@ test_that(
     x <- pb_list(
       repo = "cboettig/piggyback-tests",
       tag = "v0.0.1",
-      .token = Sys.getenv("GITHUB_TOKEN")
+      .token = gh::gh_token()
     )
 
     expect_true(nrow(x) > 1)
     expect_true("iris.tsv.gz" %in% x$file_name)
+  }
+)
+
+test_that(
+  "using 'latest' will find files of the most recent release",{
+
+    skip_if_offline("api.github.com")
+
+    x <- pb_list(
+      repo = "cboettig/piggyback-tests",
+      tag = "latest",
+      .token = gh::gh_token()
+    )
+
+    expect_equivalent(unique(x$tag), "v3")
+    expect_equivalent(nrow(x), 2)
   }
 )
 
@@ -37,10 +53,26 @@ test_that(
 
     x <- pb_releases(
       repo = "cboettig/piggyback-tests",
-      .token = Sys.getenv("GITHUB_TOKEN")
+      .token = gh::gh_token()
     )
 
     expect_true(nrow(x) > 1)
     expect_true("v0.0.1" %in% x$tag_name)
   }
 )
+
+test_that(
+  "repos with no releases are handled correctly", {
+    skip_if_offline("api.github.com")
+
+    expect_warning(
+    x <- pb_releases(
+      repo = "tanho63/tanho63",
+      .token = gh::gh_token()
+    ),
+    "No GitHub releases"
+    )
+    expect_equivalent(nrow(x), 0)
+  }
+)
+
